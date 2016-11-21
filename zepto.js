@@ -50,22 +50,29 @@ var Zepto = (function() {
       'frameborder': 'frameBorder',
       'contenteditable': 'contentEditable'
     },
+    
+    //数组判断函数
     isArray = Array.isArray ||
       function(object){ return object instanceof Array }
 
+  //判断一个element是否符合给定的选择器    
   zepto.matches = function(element, selector) {
     if (!selector || !element || element.nodeType !== 1) return false
     var matchesSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
                           element.oMatchesSelector || element.matchesSelector
     if (matchesSelector) return matchesSelector.call(element, selector)
     // fall back to performing a selector:
+    //如果没有matchesSelector方法
     var match, parent = element.parentNode, temp = !parent
     if (temp) (parent = tempParent).appendChild(element)
+
+    //??这一块我也不明白
     match = ~zepto.qsa(parent, selector).indexOf(element)
     temp && tempParent.removeChild(element)
     return match
   }
 
+  //判断类型 如果是null返回字符串null，null没有原型,所以没有tostring方法
   function type(obj) {
     return obj == null ? String(obj) :
       class2type[toString.call(obj)] || "object"
@@ -75,6 +82,7 @@ var Zepto = (function() {
   function isWindow(obj)     { return obj != null && obj == obj.window }
   function isDocument(obj)   { return obj != null && obj.nodeType == obj.DOCUMENT_NODE }
   function isObject(obj)     { return type(obj) == "object" }
+  
   function isPlainObject(obj) {
     return isObject(obj) && !isWindow(obj) && Object.getPrototypeOf(obj) == Object.prototype
   }
@@ -251,15 +259,24 @@ var Zepto = (function() {
   // `$.zepto.qsa` is Zepto's CSS selector implementation which
   // uses `document.querySelectorAll` and optimizes for some special cases, like `#id`.
   // This method can be overriden in plugins.
+
+  //通过选择器选择元素，如果没有返回空数组
+  //判断选择器类型，ID，class，或简单选择器（就是没有空格，没有#和.的选择器），并获得选择器的名字。
   zepto.qsa = function(element, selector){
     var found,
         maybeID = selector[0] == '#',
         maybeClass = !maybeID && selector[0] == '.',
         nameOnly = maybeID || maybeClass ? selector.slice(1) : selector, // Ensure that a 1 char tag name still gets checked
         isSimple = simpleSelectorRE.test(nameOnly)
+    
+    //连续的三元运算符，从左到友依次计算
+    //如果是简单选择器且可能是ID选择器，就调用getElementById方法，否则（如果element不是元素节点且不是document，返回空数组，否则调用slice.call方法）
     return (isDocument(element) && isSimple && maybeID) ?
       ( (found = element.getElementById(nameOnly)) ? [found] : [] ) :
       (element.nodeType !== 1 && element.nodeType !== 9) ? [] :
+
+      //这里又是一个三元运算符，如果是简单选择器且不是ID选择器，则判断是否使class选择器。如果是css选择器，调用getElementsByClassName 方法，否则调用getElementsByTagName。
+      //否则直接调用querySelectorAll方法。
       slice.call(
         isSimple && !maybeID ?
           maybeClass ? element.getElementsByClassName(nameOnly) : // If it's simple, it could be a class
