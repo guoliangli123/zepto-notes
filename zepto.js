@@ -88,9 +88,16 @@ var Zepto = (function() {
   }
   function likeArray(obj) { return typeof obj.length == 'number' }
 
+  //过滤null值
   function compact(array) { return filter.call(array, function(item){ return item != null }) }
+  
+  //？？
   function flatten(array) { return array.length > 0 ? $.fn.concat.apply([], array) : array }
+  
+  //将字符串转为驼峰式 function replace(match, p1, p2, p3, offset, string) 
   camelize = function(str){ return str.replace(/-+(.)?/g, function(match, chr){ return chr ? chr.toUpperCase() : '' }) }
+  
+  //将驼峰式改成短划线式 
   function dasherize(str) {
     return str.replace(/::/g, '/')
            .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
@@ -98,6 +105,8 @@ var Zepto = (function() {
            .replace(/_/g, '-')
            .toLowerCase()
   }
+
+  // 数组去重，这一步比较巧妙。
   uniq = function(array){ return filter.call(array, function(item, idx){ return array.indexOf(item) == idx }) }
 
   function classRE(name) {
@@ -105,10 +114,12 @@ var Zepto = (function() {
       classCache[name] : (classCache[name] = new RegExp('(^|\\s)' + name + '(\\s|$)'))
   }
 
+  //为css添加数值px，cssNumber为不需要使用px的属性
   function maybeAddPx(name, value) {
     return (typeof value == "number" && !cssNumber[dasherize(name)]) ? value + "px" : value
   }
 
+  //计算浏览器默认display
   function defaultDisplay(nodeName) {
     var element, display
     if (!elementDisplay[nodeName]) {
